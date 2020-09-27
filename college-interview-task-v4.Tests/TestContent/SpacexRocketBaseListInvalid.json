@@ -1,0 +1,17 @@
+﻿[
+  {
+    "ida": 1,
+    "rocket_id": "falcon1"
+  },
+  {
+    "ida": 2,
+    "rocket_id": "falcon9"
+  },
+  {
+    //"ida": 3,
+    "rocket_id": "falconheavy"
+  },
+  {
+    "ida": 4,
+    "rocket_id": "starship"
+  }
