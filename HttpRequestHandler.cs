@@ -1,82 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace college_interview_task_v4
 {
-    public abstract class HttpRequestHandler<TRequest, TResponse>
+    public abstract class HttpRequestHandler<TResponse>
     {
-        public const string Variable1 = "abc";
+        private HttpClient httpClientProxy;
 
+        private IHttpResponseParser<TResponse> parser { get; }
 
-
-        internal HttpClient _httpClientProxy;
-
-        private IHttpResponseParser<TResponse> _parser { get; }
-
-
-
-        protected HttpRequestHandler(HttpClient httpClientProxy, IHttpResponseParser<TResponse> parser)
-        {
-            _parser = parser;
+        protected HttpRequestHandler(HttpClient httpClientProxy, IHttpResponseParser<TResponse> parser) {
+            this.parser = parser;
+            this.httpClientProxy = httpClientProxy;
         }
 
-        public async Task<TResponse> Handle(TRequest request, object payload, HttpMethod methodName,
-            string pleaseProvideFullUrlHere,
-            IDictionary<string, string> additionalHeaders, CancellationToken cancellationToken)
-        {
-            var uriString = $"{_httpClientProxy.BaseAddress}{pleaseProvideFullUrlHere}";
+        public async Task<TResponse> Handle(HttpMethod httpMethod, string relativeUrl, CancellationToken cancellationToken,
+            IDictionary<string, string>? headers = null, HttpContent? payload = null) {
+            
+            string uri = GetUri(relativeUrl);
+            var httpRequestMessage = GetHttpRequestMessage(httpMethod, headers, payload, uri);
+            var response = await GetRespnse(httpRequestMessage, cancellationToken);
+            return await ParseResponse(response, cancellationToken);
+        }
 
-            var httpRequestMessage = new HttpRequestMessage(methodName, new Uri(uriString));
+        public async Task<TResponse> Handle(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) {
+            HttpResponseMessage response = await GetRespnse(httpRequestMessage, cancellationToken);
+            return await ParseResponse(response, cancellationToken);
+        }
 
-            if (payload == null)
-            {
-            }
-            else
-            {
-                httpRequestMessage.Content = payload as HttpContent;
-            }
+        private string GetUri(string relativeUrl) {
+            return $"{httpClientProxy.BaseAddress}{relativeUrl}";
+        }
 
-            var headers = additionalHeaders;
-
-            if (headers == null)
-            {
-            }
-            else
-            {
-                foreach (var header in headers)
-                {
+        private static HttpRequestMessage GetHttpRequestMessage(HttpMethod httpMethod, IDictionary<string, string>? headers, HttpContent? payload, string uri) {
+            var httpRequestMessage = new HttpRequestMessage(httpMethod, new Uri(uri));
+            if (payload != null) httpRequestMessage.Content = payload;
+            if (headers != null) {
+                foreach (KeyValuePair<string, string> header in headers) {
                     httpRequestMessage.Headers.Add(header.Key, header.Value);
                 }
             }
+            return httpRequestMessage;
+        }
 
-            HttpResponseMessage response = await _httpClientProxy.SendAsync(httpRequestMessage, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new EndOfStreamException(string.Join(",", response.Headers));
+        private async Task<HttpResponseMessage> GetRespnse(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) {
+            HttpResponseMessage response = await httpClientProxy.SendAsync(httpRequestMessage, cancellationToken);
+            if (!response.IsSuccessStatusCode) {
+                throw new HttpRequestException($"{(int)response.StatusCode} {response.StatusCode}");
             }
 
-            try
-            {
-                return _parser.ParseAsync(response);
+            return response;
+        }
+
+        private async Task<TResponse> ParseResponse(HttpResponseMessage response, CancellationToken cancellationToken) {
+            try {
+                return await parser.ParseAsync(response, cancellationToken);
             }
-            catch (Exception ex)
-            {
-                throw new NotImplementedException("todo: add missing implementation");
+            catch (Exception ex) {
+                throw new FormatException("Error occured while parsing http response. Details: " + Environment.NewLine + ex.Message, ex);
             }
         }
 
-        public interface IHttpResponseParser<out TResult>
+        public interface IHttpResponseParser<TResult>
         {
-            TResult ParseAsync(HttpResponseMessage response);
+            public Task<TResult> ParseAsync(HttpResponseMessage response, CancellationToken cancellationToken);
         }
-
 
     }
 }
