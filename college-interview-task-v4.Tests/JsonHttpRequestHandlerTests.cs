@@ -23,37 +23,42 @@ namespace college_interview_task_v4.Tests
 
         private readonly string spacexRocketsBaseAddress = "https://api.spacexdata.com/v3/rockets";
 
+        private string spacexRocketsRelativeUrl = $"?filter=id,rocket_id";
+
+        private CancellationTokenSource cts = new CancellationTokenSource();
+
+        private List<int> SuccessStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
+                .Where(sc => sc >= 200 && sc <= 299).ToList();
+
+        private List<int> failStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
+                .Where(sc => sc < 200 || sc > 299).ToList();
+
 
         [Fact]
         public async Task Handle_SpacexRocketBaseListShouldParse() {
-            List<int> SuccessStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
-                .Where(sc => sc >= 200 && sc <= 299).ToList();
-
             foreach (int SuccessStatusCode in SuccessStatusCodes) {
-                string json = spacexRocketBaseListJson;
-                Mock<HttpMessageHandler> handlerMock = GetMockedHandler(json, (HttpStatusCode)SuccessStatusCode);
+                Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListJson, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
                 var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
-                var cts = new CancellationTokenSource();
-                var relativeUrl = $"?filter=id,rocket_id";
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri($"{spacexRocketsBaseAddress}{relativeUrl}"));
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
 
                 List<SpacexRocketBase> expected = GetSpacexRocketBaseList();
+                var expectedUri = new Uri(spacexRocketsBaseAddress + spacexRocketsRelativeUrl);
 
                 // Testing both handle overloads.
-                List<List<SpacexRocketBase>> actuals = new List<List<SpacexRocketBase>>();
-                actuals.Add(await jsonHttpRequestHandler.Handle(HttpMethod.Get, relativeUrl, cts.Token));
+                var actuals = new List<List<SpacexRocketBase>>();
+                actuals.Add(await jsonHttpRequestHandler.Handle(HttpMethod.Get, spacexRocketsRelativeUrl, cts.Token));
                 actuals.Add(await jsonHttpRequestHandler.Handle(httpRequestMessage, cts.Token));
                     
                 foreach (var actual in actuals) {
                     Assert.NotNull(actual);
+                    Assert.True(actual.Count == expected.Count);
 
                     for (int i = 0; i < actual.Count; i++) {
                         Assert.True(actual[i].Equals(expected[i]));
                     }
                 }
-
-                var expectedUri = new Uri(spacexRocketsBaseAddress + relativeUrl);
 
                 handlerMock.Protected().Verify(
                     "SendAsync",
@@ -69,21 +74,37 @@ namespace college_interview_task_v4.Tests
 
         [Fact]
         public async Task Handle_ShouldThrowHttpRequestException() {
-            List<int> failStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
-                .Where(sc => sc < 200 || sc > 299).ToList();
-
             foreach (int failStatusCode in failStatusCodes) {
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler("", (HttpStatusCode)failStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
 
                 var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
-                var cts = new CancellationTokenSource();
-                var relativeUrl = $"?filter=id,rocket_id";
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri($"{spacexRocketsBaseAddress}{relativeUrl}"));
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
 
                 // Testing both handle overloads
-                await Assert.ThrowsAsync<HttpRequestException>(() => jsonHttpRequestHandler.Handle(HttpMethod.Get, relativeUrl, cts.Token));
-                await Assert.ThrowsAsync<HttpRequestException>(() => jsonHttpRequestHandler.Handle(httpRequestMessage, cts.Token));
+                await Assert.ThrowsAsync<HttpRequestException>(
+                    () => jsonHttpRequestHandler.Handle(HttpMethod.Get, spacexRocketsRelativeUrl, cts.Token));
+                await Assert.ThrowsAsync<HttpRequestException>(
+                    () => jsonHttpRequestHandler.Handle(httpRequestMessage, cts.Token));
+            }
+        }
+
+        [Fact]
+        public async Task Handle_ShouldThrowFormatException() {
+            foreach (int SuccessStatusCode in SuccessStatusCodes) {
+                Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListInvalidJson, (HttpStatusCode)SuccessStatusCode);
+                HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
+
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
+
+                // Testing both handle overloads
+                await Assert.ThrowsAsync<FormatException>(
+                    () => jsonHttpRequestHandler.Handle(HttpMethod.Get, spacexRocketsRelativeUrl, cts.Token));
+                await Assert.ThrowsAsync<FormatException>(
+                    () => jsonHttpRequestHandler.Handle(httpRequestMessage, cts.Token));
             }
         }
 
