@@ -22,7 +22,7 @@ namespace Demo
 
         public async Task<SpacexRocket> GetRocketAsync(string rocketId, CancellationToken cancellationToken) {
             var relativeUrl = $"/{rocketId}?filter=id,active,height/meters,diameter/meters,mass/kg,payload_weights,engines/thrust_to_weight,rocket_name,rocket_id";
-            var jsonHttpRequestHandler = new JsonHttpRequestHandler<SpacexRocket>(httpClient, new JsonHttpRequestHandler<SpacexRocket>.ResponseParser());
+            var jsonHttpRequestHandler = new JsonHttpRequestHandler<SpacexRocket>(httpClient);
 
             SpacexRocket spacexRocket = await jsonHttpRequestHandler.Handle(HttpMethod.Get, relativeUrl, cancellationToken);
             return spacexRocket;
@@ -30,7 +30,7 @@ namespace Demo
 
         public async Task<Dictionary<int, string>> GetRocketsAsync(CancellationToken cancellationToken) {
             var relativeUrl = $"?filter=id,rocket_id";
-            var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient, new JsonHttpRequestHandler<List<SpacexRocketBase>>.ResponseParser());
+            var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
             List<SpacexRocketBase> spacexRocketBases = await jsonHttpRequestHandler.Handle(HttpMethod.Get, relativeUrl, cancellationToken);
             return spacexRocketBases.ToDictionary(r => r.id, r => r.rocket_id);
         }

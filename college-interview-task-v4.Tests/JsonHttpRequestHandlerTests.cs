@@ -23,35 +23,6 @@ namespace college_interview_task_v4.Tests
 
         private readonly string spacexRocketsBaseAddress = "https://api.spacexdata.com/v3/rockets";
 
-        [Fact]
-        public async Task ParseAsync_SpacexRocketBaseListShouldParse() {
-            string json = spacexRocketBaseListJson;
-            var cts = new CancellationTokenSource();
-            HttpContent content = new StringContent(json);
-            HttpResponseMessage response = new HttpResponseMessage { Content = content };
-            HttpRequestHandler<List<SpacexRocketBase>>.IHttpResponseParser<List<SpacexRocketBase>> parser = 
-                new JsonHttpRequestHandler<List<SpacexRocketBase>>.ResponseParser();
-
-            List<SpacexRocketBase> expected = GetSpacexRocketBaseList();
-
-            List<SpacexRocketBase> actual = await parser.ParseAsync(response, cts.Token);
-
-            for (int i = 0; i < actual.Count; i++) {
-                Assert.True(actual[i].Equals(expected[i]));
-            }
-        }
-        
-        [Fact]
-        public async Task ParseAsync_InvalidSpacexRocketBaseListShouldThrowJsonSerializationException() {
-            string json = spacexRocketBaseListInvalidJson;
-            var cts = new CancellationTokenSource();
-            HttpResponseMessage response = new HttpResponseMessage { Content = new StringContent(json) };
-
-            HttpRequestHandler<List<SpacexRocketBase>>.IHttpResponseParser<List<SpacexRocketBase>> parser =
-                new JsonHttpRequestHandler<List<SpacexRocketBase>>.ResponseParser();
-
-            await Assert.ThrowsAsync<JsonSerializationException>(() => parser.ParseAsync(response, cts.Token));
-        }
 
         [Fact]
         public async Task Handle_SpacexRocketBaseListShouldParse() {
@@ -62,8 +33,7 @@ namespace college_interview_task_v4.Tests
                 string json = spacexRocketBaseListJson;
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler(json, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
-                var jsonHttpRequestHandler =
-                    new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient, new JsonHttpRequestHandler<List<SpacexRocketBase>>.ResponseParser());
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
                 var cts = new CancellationTokenSource();
                 var relativeUrl = $"?filter=id,rocket_id";
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri($"{spacexRocketsBaseAddress}{relativeUrl}"));
@@ -106,8 +76,7 @@ namespace college_interview_task_v4.Tests
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler("", (HttpStatusCode)failStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
 
-                var jsonHttpRequestHandler
-                    = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient, new JsonHttpRequestHandler<List<SpacexRocketBase>>.ResponseParser());
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
                 var cts = new CancellationTokenSource();
                 var relativeUrl = $"?filter=id,rocket_id";
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri($"{spacexRocketsBaseAddress}{relativeUrl}"));

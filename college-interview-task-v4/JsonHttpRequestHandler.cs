@@ -22,6 +22,6 @@ namespace college_interview_task_v4
             }
         }
 
-        public JsonHttpRequestHandler(HttpClient httpClientProxy, ResponseParser responseParser) : base(httpClientProxy, responseParser) { }
+        public JsonHttpRequestHandler(HttpClient httpClientProxy) : base(httpClientProxy, new ResponseParser()) { }
     }
 }
