@@ -1,14 +1,16 @@
-﻿1. HttpRequestHandler służy do wysyłania żądanie http i zwracania zparsowanej odpowiedzi.
+﻿1. co ten kod robi
+HttpRequestHandler służy do wysyłania żądań http i zwracania zparsowanej odpowiedzi.
 
-2. 
-	- w klasie znajduje się nieużywana zmienna
-	- metoda 'handle' jest duża, nieczytelna oraz zawiera błędne/niezdefiniowane wyjątki, niektóre argumenty mogą być opcjonalne
-	- metoda 'ParseAsync' nie jest zdefiniowana jako asynchroniczna
-	- zmienna _httpClientProxy nie jest zainicjalizowana
-	- argument 'payload' metody 'handle' jest ogólnego typu a w miejscu w którym jest przypisywany wymagany jest typ 'HttpContent'
+2. jakie widać problemy
+- w klasie znajduje się nieużywana zmienna
+- metoda 'handle' jest duża, nieczytelna oraz zawiera błędne/niezdefiniowane wyjątki, niektóre argumenty mogą być opcjonalne
+- metoda 'ParseAsync' nie jest zdefiniowana jako asynchroniczna
+- zmienna _httpClientProxy nie jest zainicjalizowana
+- argument 'payload' metody 'handle' jest ogólnego typu a w miejscu w którym jest przypisywany wymagany jest typ 'HttpContent'
 
-3. wykorzystanie generic'ów dzięki czemu z klasy można korzystać w wielu sytuacjach.
+3. co jest fajnego?
+wykorzystanie generic'ów dzięki czemu z klasy można korzystać w wielu sytuacjach.
 
-4. 
-	- metoda handle zwraca błędne wyjątki co może spowodować błędne działanie aplikacji / utrudni debugowanie
-	- metoda handle jest zależna od BaseAddress instancji HttpClient a ten może się zmienić jeśli program korzysta z jednej instancji HttpClient
+4. jakie widzimy niebezpieczeństwa używając tej metody?
+- metoda handle zwraca błędne wyjątki co może spowodować błędne działanie aplikacji / utrudni debugowanie
+- metoda handle jest zależna od BaseAddress instancji HttpClient a ten może się zmienić jeśli program korzysta z jednej instancji HttpClient
