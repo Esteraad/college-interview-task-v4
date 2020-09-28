@@ -10,7 +10,7 @@ namespace college_interview_task_v4
     {
         private HttpClient httpClient;
 
-        private IHttpResponseParser<TResponse> parser { get; }
+        private IHttpResponseParser<TResponse> parser;
 
         protected HttpRequestHandler(HttpClient httpClient, IHttpResponseParser<TResponse> parser) {
             this.parser = parser;
@@ -22,12 +22,12 @@ namespace college_interview_task_v4
             
             string uri = GetUri(relativeUrl);
             var httpRequestMessage = GetHttpRequestMessage(httpMethod, headers, payload, uri);
-            var response = await GetRespnse(httpRequestMessage, cancellationToken);
+            var response = await GetResponse(httpRequestMessage, cancellationToken);
             return await ParseResponse(response, cancellationToken);
         }
 
         public async Task<TResponse> Handle(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) {
-            HttpResponseMessage response = await GetRespnse(httpRequestMessage, cancellationToken);
+            HttpResponseMessage response = await GetResponse(httpRequestMessage, cancellationToken);
             return await ParseResponse(response, cancellationToken);
         }
 
@@ -46,7 +46,7 @@ namespace college_interview_task_v4
             return httpRequestMessage;
         }
 
-        private async Task<HttpResponseMessage> GetRespnse(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) {
+        private async Task<HttpResponseMessage> GetResponse(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) {
             HttpResponseMessage response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
             if (!response.IsSuccessStatusCode) {
                 throw new HttpRequestException($"{(int)response.StatusCode} {response.StatusCode}");

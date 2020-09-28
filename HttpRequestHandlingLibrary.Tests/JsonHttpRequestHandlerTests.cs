@@ -26,7 +26,7 @@ namespace college_interview_task_v4.Tests
 
         private CancellationTokenSource cts = new CancellationTokenSource();
 
-        private List<int> SuccessStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
+        private List<int> successStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
                 .Where(sc => sc >= 200 && sc <= 299).ToList();
 
         private List<int> failStatusCodes = new List<int>((IEnumerable<int>)Enum.GetValues(typeof(HttpStatusCode)))
@@ -35,7 +35,7 @@ namespace college_interview_task_v4.Tests
 
         [Fact]
         public async Task Handle_SpacexRocketBaseListShouldParse() {
-            foreach (int SuccessStatusCode in SuccessStatusCodes) {
+            foreach (int SuccessStatusCode in successStatusCodes) {
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListJson, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
                 var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBaseTest>>(httpClient);
@@ -91,7 +91,7 @@ namespace college_interview_task_v4.Tests
 
         [Fact]
         public async Task Handle_ShouldThrowFormatException() {
-            foreach (int SuccessStatusCode in SuccessStatusCodes) {
+            foreach (int SuccessStatusCode in successStatusCodes) {
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListInvalidJson, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
 
