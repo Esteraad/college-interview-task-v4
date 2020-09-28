@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Demo.models
 {
     public class SpacexRocketBase
@@ -11,6 +13,10 @@ namespace Demo.models
             return obj is SpacexRocketBase @base &&
                    id == @base.id &&
                    rocket_id == @base.rocket_id;
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(id, rocket_id);
         }
 
         public override string ToString() {

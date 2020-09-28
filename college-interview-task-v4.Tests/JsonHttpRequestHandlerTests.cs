@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Reflection;
 using Xunit;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Moq;
 using Moq.Protected;
 using System.Threading;
@@ -39,15 +38,15 @@ namespace college_interview_task_v4.Tests
             foreach (int SuccessStatusCode in SuccessStatusCodes) {
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListJson, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
-                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBaseTest>>(httpClient);
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
                     new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
 
-                List<SpacexRocketBase> expected = GetSpacexRocketBaseList();
+                List<SpacexRocketBaseTest> expected = GetSpacexRocketBaseList();
                 var expectedUri = new Uri(spacexRocketsBaseAddress + spacexRocketsRelativeUrl);
 
                 // Testing both handle overloads.
-                var actuals = new List<List<SpacexRocketBase>>();
+                var actuals = new List<List<SpacexRocketBaseTest>>();
                 actuals.Add(await jsonHttpRequestHandler.Handle(HttpMethod.Get, spacexRocketsRelativeUrl, cts.Token));
                 actuals.Add(await jsonHttpRequestHandler.Handle(httpRequestMessage, cts.Token));
                     
@@ -78,7 +77,7 @@ namespace college_interview_task_v4.Tests
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler("", (HttpStatusCode)failStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
 
-                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBaseTest>>(httpClient);
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
                     new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
 
@@ -96,7 +95,7 @@ namespace college_interview_task_v4.Tests
                 Mock<HttpMessageHandler> handlerMock = GetMockedHandler(spacexRocketBaseListInvalidJson, (HttpStatusCode)SuccessStatusCode);
                 HttpClient httpClient = GetClient(spacexRocketsBaseAddress, handlerMock);
 
-                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBase>>(httpClient);
+                var jsonHttpRequestHandler = new JsonHttpRequestHandler<List<SpacexRocketBaseTest>>(httpClient);
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
                     new Uri($"{spacexRocketsBaseAddress}{spacexRocketsRelativeUrl}"));
 
@@ -132,12 +131,12 @@ namespace college_interview_task_v4.Tests
             return handlerMock;
         }
 
-        private static List<SpacexRocketBase> GetSpacexRocketBaseList() {
-            return new List<SpacexRocketBase>{
-                new SpacexRocketBase{ id = 1, rocket_id = "falcon1"},
-                new SpacexRocketBase{ id = 2, rocket_id = "falcon9"},
-                new SpacexRocketBase{ id = 3, rocket_id = "falconheavy"},
-                new SpacexRocketBase{ id = 4, rocket_id = "starship"}
+        private static List<SpacexRocketBaseTest> GetSpacexRocketBaseList() {
+            return new List<SpacexRocketBaseTest>{
+                new SpacexRocketBaseTest{ id = 1, rocket_id = "falcon1"},
+                new SpacexRocketBaseTest{ id = 2, rocket_id = "falcon9"},
+                new SpacexRocketBaseTest{ id = 3, rocket_id = "falconheavy"},
+                new SpacexRocketBaseTest{ id = 4, rocket_id = "starship"}
             };
         }
 

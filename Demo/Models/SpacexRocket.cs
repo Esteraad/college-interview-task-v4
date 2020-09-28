@@ -79,5 +79,19 @@ namespace Demo.models
                    EqualityComparer<SpacexRocketEngines?>.Default.Equals(engines, rocket.engines) &&
                    rocket_name == rocket.rocket_name;
         }
+
+        public override int GetHashCode() {
+            HashCode hash = new HashCode();
+            hash.Add(id);
+            hash.Add(rocket_id);
+            hash.Add(active);
+            hash.Add(height);
+            hash.Add(diameter);
+            hash.Add(mass);
+            hash.Add(payload_weights);
+            hash.Add(engines);
+            hash.Add(rocket_name);
+            return hash.ToHashCode();
+        }
     }
 }
