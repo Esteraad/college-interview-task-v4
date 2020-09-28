@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\college-interview-task-v4\college-interview-task-v4.csproj" />
+    <ProjectReference Include="..\HttpRequestHandlingLibrary\HttpRequestHandlingLibrary.csproj" />
   </ItemGroup>
 
 </Project>
