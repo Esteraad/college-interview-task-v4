@@ -10,31 +10,36 @@ namespace Demo
     class Program
     {
         private static HttpClient httpClient = new HttpClient();
+        private static CancellationTokenSource cts = new CancellationTokenSource();
+        private static SpacexApi spacexApi = new SpacexApi(httpClient);
+        private static Dictionary<int, string> rockets;
 
         static public async Task Main() {
-            var cts = new CancellationTokenSource();
-            var spacexApi = new SpacexApi(httpClient);
-
             try {
-                Dictionary<int, string> rockets = await spacexApi.GetRocketsAsync(cts.Token);
-
-                while (true) {
-                    try {
-                        Console.Clear();
-                        DisplayRequest(rockets);
-                        string input = Console.ReadLine();
-                        Console.WriteLine();
-
-                        if (!await DoAction(input, rockets, spacexApi, cts)) break;
-                    }
-                    catch (Exception ex) {
-                        Console.WriteLine($"Error occured, details: { ex.Message }");
-                    }
-                    Console.WriteLine("Hit enter to continue...");
-                    Console.ReadLine();
-                }
+                rockets = await spacexApi.GetRocketsAsync(cts.Token);
             }
-            catch { Console.WriteLine("Error occured while loading rockets list. Program will exit."); }
+            catch {
+                Console.WriteLine("Error occured while loading rockets list. Program will exit.");
+                Console.ReadLine();
+                Environment.Exit(1);
+            }
+
+            while (true) {
+                try {
+                    Console.Clear();
+                    DisplayRequest(rockets);
+                    string input = Console.ReadLine();
+                    Console.WriteLine();
+
+                    if (!await DoAction(input, rockets, spacexApi, cts)) break;
+                }
+                catch (Exception ex) {
+                    Console.WriteLine($"Error occured, details: { ex.Message }");
+                }
+
+                Console.WriteLine("Hit enter to continue...");
+                Console.ReadLine();
+            }
         }
 
         private static async Task<bool> DoAction(string input, Dictionary<int, string> rockets, SpacexApi spacexApi, CancellationTokenSource cts) {

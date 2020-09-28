@@ -11,7 +11,7 @@ namespace Demo
 {
     public class SpacexApi
     {
-        private string rocketsBaseAddress = "https://api.spacexdata.com/v3/rockets";
+        private readonly string rocketsBaseAddress = "https://api.spacexdata.com/v3/rockets";
 
         private HttpClient httpClient;
 
